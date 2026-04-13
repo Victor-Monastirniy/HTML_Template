@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дані пристрою</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; padding: 20px; background: #f4f4f4; }
+        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+        .status-on { color: green; font-weight: bold; }
+        .status-off { color: red; font-weight: bold; }
+        ul { list-style-type: none; padding: 0; }
+        li { border-bottom: 1px solid #eee; padding: 5px 0; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>{{.Name}}</h1>
+    <p><strong>Дата запиту:</strong> {{.CurrentTime}}</p>
+    <p><strong>Статус пристрою:</strong>
+        {{if .IsActive}}
+        <span class="status-on">Працює</span>
+        {{else}}
+        <span class="status-off">Вимкнений</span>
+        {{end}}
+    </p>
+
+    <h3>Показники (Датчики):</h3>
+    <ul>
+        {{range .Metrics}}
+        <li>
+            <strong>{{.Name}}:</strong> {{.Value}} {{.Unit}}
+        </li>
+        {{else}}
+        <li>Дані відсутні</li>
+        {{end}}
+    </ul>
+</div>
+</body>
+</html>
