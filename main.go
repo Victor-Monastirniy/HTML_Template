@@ -1,58 +1,82 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"time"
 )
 
-// Metric описує окремий показник (датчик)
+// Metric описує показник
 type Metric struct {
-	Name  string  `json:"name"`
-	Value float64 `json:"value"`
-	Unit  string  `json:"unit"`
+	Name  string
+	Value float64
+	Unit  string
 }
 
+// Device описує окремий пристрій
 type Device struct {
-	Name        string   `json:"name"`
-	IsActive    bool     `json:"is_active"`
-	Metrics     []Metric `json:"metrics"`
-	CurrentTime string   `json:"current_time"`
+	Type    string
+	Model   string
+	IsOn    bool
+	Metrics []Metric
+}
+
+// PowerUnit — основна структура (те, що йде в шаблон)
+type PowerUnit struct {
+	UnitName   string
+	Location   string
+	Devices    []Device // Тепер тут слайс пристроїв
+	LastUpdate string
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	data := Device{
-		Name:     "Вентилятор",
-		IsActive: true,
-		Metrics: []Metric{
-			{Name: "Напруга", Value: 220, Unit: "В"},
-			{Name: "Потужність", Value: 50, Unit: "кВт*год"},
-			{Name: "Час роботи", Value: 30, Unit: "хв"},
+	// Формуємо дані з декількома пристроями
+	data := PowerUnit{
+		UnitName:   "Дім",
+		Location:   "Запорізька область",
+		LastUpdate: time.Now().Format("15:04:05"),
+		Devices: []Device{
+			{
+				Type:  "Плита",
+				Model: "АС-2",
+				IsOn:  true,
+				Metrics: []Metric{
+					{Name: "Напруга", Value: 220.5, Unit: "kV"},
+					{Name: "Навантаження", Value: 78.0, Unit: "%"},
+				},
+			},
+			{
+				Type:  "Холодильник",
+				Model: "СН56",
+				IsOn:  false,
+				Metrics: []Metric{
+					{Name: "Температура", Value: 5, Unit: "°C"},
+				},
+			},
+			{
+				Type:  "Кондиціонер",
+				Model: "НН12",
+				IsOn:  true,
+				Metrics: []Metric{
+					{Name: "Температура", Value: 20.0, Unit: "°C"},
+					{Name: "Потужність", Value: 120.0, Unit: "кВт"},
+				},
+			},
 		},
-		CurrentTime: time.Now().Format("02.01.2006 15:04:05"),
 	}
 
-	// Завантаження шаблону
-	tmpl, err := template.ParseFiles("./templates/index.html")
+	tmpl, err := template.ParseFiles("templates/index.html")
 	if err != nil {
-		http.Error(w, "Помилка завантаження шаблону: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Rendering
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		http.Error(w, "Помилка виконання шаблону: "+err.Error(), http.StatusInternalServerError)
-	}
+	tmpl.Execute(w, data)
 }
 
 func main() {
 	http.HandleFunc("/", handler)
-
-	fmt.Println("Сервер запущено на http://localhost:8080")
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		fmt.Printf("Помилка при запуску сервера: %v\n", err)
-	}
+	log.Println("Сервер стартував на http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -3,38 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Дані пристрою</title>
+    <title>Моніторинг: {{.UnitName}}</title>
     <style>
-        body { font-family: sans-serif; line-height: 1.6; padding: 20px; background: #f4f4f4; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); max-width: 600px; margin: auto; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; padding: 20px; }
+        .header { background: #1ae8e1; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .device-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .device-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .status-on { color: green; font-weight: bold; }
         .status-off { color: red; font-weight: bold; }
-        ul { list-style-type: none; padding: 0; }
-        li { border-bottom: 1px solid #eee; padding: 5px 0; }
+        .metric-item { font-size: 0.9em; color: #555; border-bottom: 1px solid #eee; padding: 4px 0; }
     </style>
 </head>
 <body>
-<div class="card">
-    <h1>{{.Name}}</h1>
-    <p><strong>Дата запиту:</strong> {{.CurrentTime}}</p>
-    <p><strong>Статус пристрою:</strong>
-        {{if .IsActive}}
-        <span class="status-on">Працює</span>
-        {{else}}
-        <span class="status-off">Вимкнений</span>
-        {{end}}
-    </p>
 
-    <h3>Показники (Датчики):</h3>
-    <ul>
-        {{range .Metrics}}
-        <li>
-            <strong>{{.Name}}:</strong> {{.Value}} {{.Unit}}
-        </li>
-        {{else}}
-        <li>Дані відсутні</li>
-        {{end}}
-    </ul>
+<div class="header">
+    <h1>Об'єкт: {{.UnitName}}</h1>
+    <p>Локація: {{.Location}} | Оновлено: {{.LastUpdate}}</p>
 </div>
+
+<div class="device-grid">
+    {{range .Devices}}
+    <div class="device-card">
+        <h3>{{.Type}} <small>({{.Model}})</small></h3>
+        <p>
+            {{if .IsOn}}
+            <span class="status-on">Працює</span>
+            {{else}}
+            <span class="status-off">Вимкнений</span>
+            {{end}}
+        </p>
+
+        <div class="metrics">
+            <strong>Показники:</strong>
+            {{range .Metrics}}
+            <div class="metric-item">
+                {{.Name}}: <b>{{.Value}} {{.Unit}}</b>
+            </div>
+            {{else}}
+            <p>Немає даних</p>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+</div>
+
 </body>
 </html>
